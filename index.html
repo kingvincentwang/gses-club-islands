@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>關西國小社團群島</title>
+  <meta name="description" content="關西國小 115 學年度課後社團即時資訊互動網站：漂浮在雲海上的天空之城群島。" />
+  <link rel="icon" href="assets/mascot.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Iansui&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="scene"></div>
+
+  <!-- 載入畫面 -->
+  <div id="loading">
+    <img src="assets/mascot.png" alt="" />
+    <p>雲朵正在聚集，浮空島緩緩升起⋯</p>
+    <div class="bar"><i></i></div>
+  </div>
+
+  <!-- 左上：標題 -->
+  <header class="card brand">
+    <img src="assets/mascot.png" alt="關小公仔" />
+    <div>
+      <h1>關西國小社團群島</h1>
+      <p><span id="termText">115 學年度上學期</span>・6 大類・<span id="clubCount">10</span> 個社團</p>
+    </div>
+  </header>
+
+  <!-- 上中：今日名言 -->
+  <div class="card quote" id="quote">
+    <span class="tag">今日名言</span>
+    <span id="quoteText">有興趣，就是最好的老師。</span>
+    <button id="quoteNext" title="換一句" aria-label="換一句">↻</button>
+  </div>
+
+  <!-- 右上：時間天氣 -->
+  <div class="card clock">
+    <div class="clock-time">
+      <b id="dateText">--</b>
+      <span id="timeText">--</span>
+    </div>
+    <div class="clock-weather">
+      <b id="weatherText">⛅ --°C</b>
+      <span id="weatherSub">新竹關西</span>
+    </div>
+  </div>
+
+  <!-- 右側：即時動態 -->
+  <aside class="card live" id="livePanel">
+    <div class="live-head">
+      <h2><span class="pulse"></span>即時動態</h2>
+      <button class="icon-btn" id="liveToggle" aria-label="收合">－</button>
+    </div>
+    <div class="live-stats" id="liveStats"></div>
+    <div class="live-list" id="liveList"></div>
+  </aside>
+
+  <!-- 左下：導覽員 -->
+  <div class="guide" id="guide">
+    <img src="assets/mascot.png" alt="關小公仔導覽員" id="guideImg" />
+    <div class="bubble">
+      <p id="guideText">點一座島，開始探索！</p>
+      <small id="eggText">雲海裡藏了 8 隻「雲寶」，已找到 0 隻</small>
+      <div class="guide-btns">
+        <button class="pill primary" id="tourBtn">▶ 島嶼導覽</button>
+        <button class="pill" id="findBtn">🔎 找社團</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部工具列 -->
+  <nav class="toolbar">
+    <div class="seg" id="viewSeg">
+      <button data-view="full" class="on">全景</button>
+      <button data-view="top">鳥瞰</button>
+      <button data-view="list">清單</button>
+    </div>
+    <div class="seg">
+      <button id="tgLabels" class="on">島名</button>
+      <button id="tgPause">暫停</button>
+      <button id="tgFx" class="on">特效</button>
+      <button id="tgTime">🕒 即時</button>
+    </div>
+  </nav>
+
+  <!-- 時光機 -->
+  <div class="card timemachine" id="timeMachine" hidden>
+    <h3>🕰️ 時光機</h3>
+    <p>想看看某一天的社團時間？選好星期與時間，群島會跟著變化。</p>
+    <div class="days" id="tmDays"></div>
+    <label class="tm-range">
+      <span id="tmTimeText">16:10</span>
+      <input type="range" id="tmTime" min="420" max="1260" step="5" value="970" />
+    </label>
+    <div class="tm-btns">
+      <button class="pill" id="tmNow">回到即時</button>
+      <button class="pill primary" id="tmApply">出發！</button>
+    </div>
+  </div>
+
+  <!-- 島嶼面板 -->
+  <aside class="panel" id="islandPanel" hidden>
+    <button class="close" data-close="islandPanel" aria-label="關閉">✕</button>
+    <div id="islandBody"></div>
+  </aside>
+
+  <!-- 清單 -->
+  <section class="overlay" id="listView" hidden>
+    <div class="sheet">
+      <div class="sheet-head">
+        <h2>🗺️ 社團總覽</h2>
+        <div class="seg small" id="listMode">
+          <button data-mode="cards" class="on">卡片</button>
+          <button data-mode="week">週課表</button>
+        </div>
+        <button class="close" data-close="listView" aria-label="關閉">✕</button>
+      </div>
+      <div class="filters">
+        <input type="search" id="search" placeholder="搜尋社團、老師、上課內容⋯" />
+        <div class="chips" id="catChips"></div>
+        <div class="chips" id="dayChips"></div>
+        <select id="gradeSel" aria-label="年級">
+          <option value="0">全部年級</option>
+          <option value="1">1 年級可報</option><option value="2">2 年級可報</option>
+          <option value="3">3 年級可報</option><option value="4">4 年級可報</option>
+          <option value="5">5 年級可報</option><option value="6">6 年級可報</option>
+        </select>
+      </div>
+      <div id="listBody"></div>
+    </div>
+  </section>
+
+  <!-- 社團詳細 -->
+  <section class="overlay" id="clubModal" hidden>
+    <div class="modal" id="clubBody"></div>
+  </section>
+
+  <div id="toasts"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
