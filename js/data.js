@@ -11,6 +11,8 @@ export const SCHOOL = {
   lat: 24.7887,
   lon: 121.1757,
   place: '新竹關西',
+  // 社團報名系統（Google Apps Script，需用學校 Google 帳號登入）
+  signupUrl: 'https://script.google.com/a/macros/gses.hcc.edu.tw/s/AKfycbxH9iGCDrmlHvAClAuZx3csw5FOa6Qp1M1RrCRp4QE6dWOCNuYIQbuTA8Gp9MNuhUo_Mw/exec',
 };
 
 // 6 大類＝6 座浮空島

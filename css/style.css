@@ -240,3 +240,15 @@ body.no-labels .ilabel { opacity: 0; pointer-events: none; }
   .sheet-head { flex-wrap: wrap; }
   .overlay { padding: 8px; }
 }
+
+/* ---------- 社團報名 ---------- */
+.ilabel.signup { border-color: var(--live); background: #fff4f0; font-weight: 700; padding: 5px 14px; }
+.ilabel.signup .nudge { display: inline-block; animation: nudge 2.4s ease-in-out infinite; }
+@keyframes nudge { 0%, 80%, 100% { transform: none; } 85% { transform: rotate(-4deg) scale(1.06); } 90% { transform: rotate(4deg) scale(1.06); } }
+.signup-btn { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px; background: linear-gradient(135deg, #f08a3c, #e8484f); color: #fff; text-decoration: none; box-shadow: 0 4px 12px rgba(232, 72, 79, .3); transition: transform .15s; }
+.signup-btn:hover { transform: translateY(-2px); }
+.signup-btn > span:first-child { font-size: 26px; }
+.signup-btn > span:nth-child(2) { flex: 1; display: flex; flex-direction: column; }
+.signup-btn b { font-size: 16px; }
+.signup-btn small { font-size: 12px; opacity: .9; }
+.signup-btn > span:last-child { font-size: 20px; font-weight: 900; }

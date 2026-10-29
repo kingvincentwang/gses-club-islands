@@ -477,6 +477,47 @@ function drawClock() {
 }
 
 const schoolWindows = [];
+// 中央島的社團報名處：點攤位或標籤就開啟報名系統
+function signupBooth() {
+  const b = new THREE.Group();
+  for (const [x, z] of [[-0.8, -0.5], [0.8, -0.5], [-0.8, 0.5], [0.8, 0.5]]) b.add(at(mesh(new THREE.CylinderGeometry(0.07, 0.07, 2.2, 5), '#a47243'), x, 1.1, z));
+  b.add(at(mesh(new THREE.BoxGeometry(1.9, 0.8, 1.2), '#fff3dc'), 0, 0.4, 0));
+  b.add(at(mesh(new THREE.BoxGeometry(2.0, 0.1, 1.3), '#a47243'), 0, 0.85, 0));
+  // 紅白條紋遮雨棚
+  for (let i = 0; i < 5; i++) {
+    const s = mesh(new THREE.BoxGeometry(0.42, 0.08, 1.55), i % 2 ? '#ffffff' : '#e8484f');
+    s.position.set(-0.84 + i * 0.42, 2.3, 0); s.rotation.x = 0.18;
+    b.add(s);
+  }
+  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 96;
+  const c = cv.getContext('2d');
+  c.fillStyle = '#f08a3c'; c.fillRect(0, 0, 256, 96);
+  c.fillStyle = '#fff'; c.font = 'bold 50px "Noto Sans TC", sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('社團報名', 128, 52);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+  b.add(at(new THREE.Mesh(new THREE.PlaneGeometry(1.7, 0.64), new THREE.MeshBasicMaterial({ map: tex })), 0, 0.42, 0.61));
+  // 桌上的報名表與筆
+  b.add(at(mesh(new THREE.BoxGeometry(0.5, 0.03, 0.36), '#ffffff'), -0.3, 0.92, 0.1));
+  b.add(at(mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.4, 5), '#3d7fc4'), 0.2, 0.93, 0.1)).children.at(-1).rotation.z = Math.PI / 2;
+  const arrow = mesh(new THREE.ConeGeometry(0.28, 0.5, 6), '#ffd23f');
+  arrow.rotation.x = Math.PI;
+  at(arrow, 0, 3.2, 0);
+  b.add(arrow);
+  bobbers.push({ obj: arrow, base: 3.2, amp: 0.25, speed: 3, phase: 0 });
+  spinners.push({ obj: arrow, axis: 'y', speed: 1.5 });
+  const lb = label('<span class="nudge">📝 社團報名處</span>', 'ilabel signup', openSignup);
+  lb.position.set(0, 4.1, 0);
+  b.add(lb);
+  b.position.set(7.4, 0, 3.2);
+  b.rotation.y = 1.0;
+  b.userData = { type: 'signup' };
+  pickables.push(b);
+  return b;
+}
+function openSignup() {
+  window.open(SCHOOL.signupUrl, '_blank', 'noopener');
+  toast('📝 已在新分頁開啟社團報名系統');
+}
+
 function buildSchool(g) {
   const R = rng(42);
   // 跑道與操場
@@ -523,7 +564,8 @@ function buildSchool(g) {
   big.position.set(6.2, 0, -3.2);
   g.add(big);
   const P = Placer(8.5);
-  P.take(0, -3, 5.5); P.take(-5.6, -1, 2.5); P.take(0, 3.4, 5.8); P.take(6.2, -3.2, 2); P.take(3.2, -0.6, 0.8);
+  P.take(0, -3, 5.5); P.take(-5.6, -1, 2.5); P.take(0, 3.4, 5.8); P.take(6.2, -3.2, 2); P.take(3.2, -0.6, 0.8); P.take(7.4, 3.2, 1.8);
+  if (SCHOOL.signupUrl) g.add(signupBooth());
   for (let i = 0; i < 10; i++) { const s = P.find(R, 0.9, 5); if (s) g.add(at(tree(R, 0.8 + R() * 0.4), s.x, 0, s.z)); }
   g.add(flowers(R, 40, 8.5));
   const lb = label(`<span>🏫</span> ${SCHOOL.name}・社團群島`, 'ilabel school', () => focusIsland('school'));
@@ -931,7 +973,7 @@ function renderIsland(id, states) {
   let html;
   if (id === 'school') {
     html = `<div class="ihead" style="--c:#ffd29a"><div class="em">🏫</div><h2>${SCHOOL.name}・中央島</h2><p>${SCHOOL.fullName}｜${SCHOOL.term}課後社團</p></div>
-      <div class="ibody">${CATEGORIES.map((cat) => {
+      <div class="ibody">${SCHOOL.signupUrl ? `<a class="signup-btn" href="${SCHOOL.signupUrl}" target="_blank" rel="noopener"><span>📝</span><span><b>前往社團報名系統</b><small>請使用學校 Google 帳號登入</small></span><span>↗</span></a>` : ''}${CATEGORIES.map((cat) => {
         const cl = CLUBS.filter((c) => c.category === cat.id);
         const n = cl.filter((c) => states.get(c).state === 'live').length;
         return `<button class="ccard" style="--c:${cat.color}" data-island="${cat.id}"><div class="row"><b>${cat.emoji} ${cat.name}</b>${n ? `<span class="chip st-live">${n} 上課中</span>` : `<span class="chip">${cl.length} 個社團</span>`}</div><div class="meta">${cl.map((c) => c.name).join('・') || '即將開放'}</div></button>`;
@@ -1191,6 +1233,7 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   if (!o) return;
   const u = o.userData;
   if (u.type === 'egg') collectEgg(o);
+  else if (u.type === 'signup') openSignup();
   else if (u.type === 'club') { if (focusId !== u.club.category) focusIsland(u.club.category); openClub(u.club); }
   else if (u.type === 'island') focusIsland(u.id);
 });
